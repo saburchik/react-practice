@@ -1,57 +1,53 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import PostList from "./components/PostList";
-import MyButton from "./components/UI/button/MyButton";
-import MyInput from "./components/UI/input/MyInput";
+import PostForm from "./components/PostForm";
 import './style/App.css'
+import MySelect from "./components/UI/select/MySelect";
 
 
 function App() {
   const [posts, setPosts] = useState([
-    {
-      id: 1,
-      title: 'Скейтборды',
-      body: 'Description'
-    },
-    {
-      id: 2,
-      title: 'Самокаты',
-      body: 'Description'
-    },
-    {
-      id: 3,
-      title: 'Акссесуары',
-      body: 'Description'
-    }
+    { id: 1, title: 'Скейтборды', body: 'Something text' },
+    { id: 2, title: 'Самокаты', body: 'About Samokat' },
+    { id: 3, title: 'Акссесуары', body: 'Some accessories' }
   ])
+  const [selectedSort, setSelectedSort] = useState('')
 
-  const [title, setTitle] = useState('')
-  const bodyInputRef = useRef('')
-  const addNewPost = (e) => {
-    e.preventDefault()
-    console.log(title)
-    console.log(bodyInputRef.current.value);
+  const sortPosts = (sort) => {
+    setSelectedSort(sort)
+    setPosts([...posts].sort((a, b) => a[sort].localeCompare(b[sort])))
+  }
+
+  const createPost = (newPost) => {
+    setPosts([...posts, newPost])
+  }
+
+  const removePost = (post) => {
+    setPosts(posts.filter(p => p.id !== post.id))
   }
 
   return (
     <div className="App">
-      <form>
-        {/* Managed component */}
-        <MyInput
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          type='text'
-          placeholder='Name post'
+      <PostForm create={createPost} />
+      <hr style={{ margin: '1rem 0' }} />
+      <div>
+        <MySelect
+          value={selectedSort}
+          onChange={sortPosts}
+          defaultValue="Сортировка:"
+          options={[
+            { value: 'title', name: 'По названию' },
+            { value: 'body', name: 'По описанию' }
+          ]}
         />
-        {/* Unmanageable/Uncontrolled component */}
-        <MyInput
-          ref={bodyInputRef}
-          type='text'
-          placeholder='Description post'
-        />
-        <MyButton onClick={addNewPost}>Create a post</MyButton>
-      </form>
-      <PostList posts={posts} headTitle="Категории" />
-    </div>
+      </div>
+      {/* Условная отрисовка, запись: !==0 - можно не указывать */}
+      {
+        posts.length
+          ? <PostList remove={removePost} posts={posts} headTitle="Категории" />
+          : <h1 style={{ textAlign: 'center' }}>Посты не были найдены..</h1>
+      }
+    </div >
   );
 }
 
